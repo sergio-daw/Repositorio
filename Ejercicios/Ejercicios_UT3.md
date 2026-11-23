@@ -4,3 +4,5 @@
 [Configuración de Apache(.md)](./Ejercicios_UT3/Apache_Configuracion.md)\
 [Redirección a HTTPS](./Ejercicios_UT3/Segoviano_Galvez_Sergio_HTTPS.pdf)\
 [Redirección a HTTPS(.md)](./Ejercicios_UT3/HTTPS.md)\
+[Configuración de Nginx](./Ejercicios_UT3/Segoviano_Galvez_Sergio_Nginx.pdf)\
+[Configuración de Nginx(.md)](./Ejercicios_UT3/Nginx.md)
