@@ -34,3 +34,12 @@ nbactions.xml
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# --- Ficheros temporales de LibreOffice y Microsoft Office ---
+# Se crean mientras un documento está abierto (.odt, .docx)
+.~lock.*#
+~$*
+
+# --- Copias locales de trabajo ---
+*.orig
+*.swp
