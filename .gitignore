@@ -1,0 +1,36 @@
+# --- Datos sensibles ---
+.env
+*.env
+config.properties
+db.properties
+credenciales*
+*.key
+*.pem
+
+# --- Compilados y binarios ---
+*.class
+*.jar
+*.war
+build/
+dist/
+target/
+out/
+
+# --- Configuración local de NetBeans ---
+nbproject/private/
+nb-configuration.xml
+nbactions.xml
+
+# --- Otros IDE ---
+.idea/
+*.iml
+.vscode/
+
+# --- Ficheros temporales y del sistema ---
+*.log
+*.tmp
+*.bak
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
