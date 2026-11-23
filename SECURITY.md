@@ -10,6 +10,7 @@ Este documento explica cómo se protege la información de este repositorio: qu�
 2. [Accesibilidad y permisos](#2-accesibilidad-y-permisos)
 3. [Buenas prácticas de seguridad](#3-buenas-prácticas-de-seguridad)
 4. [Recuperación ante pérdida de datos](#4-recuperación-ante-pérdida-de-datos)
+5. [Evidencias](#5-evidencias)
 
 ## 1. Protección de datos sensibles
 
@@ -48,20 +49,28 @@ En un repositorio de una **cuenta personal** solo existen dos niveles: el propie
 | **Maintain** | Lo mismo que Write, y además gestionar el repositorio sin acciones peligrosas: descripción, temas, wikis, opciones de fusión. |
 | **Admin** | Control total: configuración, colaboradores, ramas protegidas, visibilidad, transferir o borrar el repositorio. |
 
-### Resultados de las pruebas
+### Configuración del repositorio
 
-Pruebas realizadas por un compañero con cada rol asignado:
+- El repositorio se ha transferido de la cuenta personal `cras700` a la organización **`sergio-daw`**, para poder asignar roles distintos a cada colaborador.
+- El repositorio es **público**: cualquier persona puede verlo y clonarlo, pero solo los colaboradores con rol Write o superior pueden modificarlo.
 
-| Prueba | Read | Write | Admin |
+### Permisos de cada rol
+
+No se ha podido contar con un compañero para hacer las pruebas con otra cuenta. La cuenta `cras700` es la propietaria de la organización y tiene siempre permisos de administrador, por lo que no sirve para probar los roles Read y Write. Por eso esta tabla recoge lo que permite cada rol según la documentación oficial de GitHub:
+
+| Acción | Read | Write | Admin |
 | --- | --- | --- | --- |
-| Ver y clonar el repositorio | | | |
-| Editar un fichero y hacer commit | | | |
-| Subir directamente a `main` con la rama protegida | | | |
-| Abrir un pull request | | | |
-| Fusionar un pull request | | | |
-| Ver la pestaña *Settings* | | | |
+| Ver y clonar el repositorio | ✓ | ✓ | ✓ |
+| Abrir issues y comentar | ✓ | ✓ | ✓ |
+| Editar un fichero y hacer commit | ✗ | ✓ | ✓ |
+| Subir directamente a `main` con la rama protegida | ✗ | ✗ | ✓ (si se permite saltarse la regla) |
+| Abrir un pull request desde una rama del repositorio | ✗ | ✓ | ✓ |
+| Fusionar un pull request | ✗ | ✓ | ✓ |
+| Ver la pestaña *Settings* | ✗ | ✗ | ✓ |
+| Gestionar colaboradores y ramas protegidas | ✗ | ✗ | ✓ |
+| Borrar o transferir el repositorio | ✗ | ✗ | ✓ |
 
-*(Completar con ✓ o ✗ según el resultado de cada prueba; las capturas están en la carpeta de evidencias.)*
+Sí se ha comprobado el caso de un usuario **sin ningún permiso**: al intentar editar un fichero de `main` sin haber iniciado sesión, GitHub redirige a la pantalla de inicio de sesión y no permite hacer cambios.
 
 ### Permiso adecuado para cada rol del equipo
 
@@ -77,7 +86,18 @@ Se aplica el **principio de mínimo privilegio**: cada persona recibe solo el ac
 
 ## 3. Buenas prácticas de seguridad
 
-- **Rama `main` protegida.** Nadie sube directamente a `main`: los cambios se hacen en otra rama y entran mediante un pull request. Se impide forzar el historial (*force push*) y borrar la rama. En repositorios públicos esta opción es gratuita.
+- **Rama `main` protegida.** Nadie sube directamente a `main`: los cambios se hacen en otra rama y entran mediante un pull request. En repositorios públicos esta opción es gratuita. La regla se configura en *Settings → Branches → Add classic branch protection rule* así:
+
+  | Opción | Valor |
+  | --- | --- |
+  | Branch name pattern | `main` |
+  | Require a pull request before merging | Activada, con 1 aprobación |
+  | Dismiss stale pull request approvals when new commits are pushed | Activada |
+  | Require conversation resolution before merging | Activada |
+  | Allow force pushes | Desactivada |
+  | Allow deletions | Desactivada |
+
+  La opción *Do not allow bypassing the above settings* se deja desactivada porque el repositorio tiene un único administrador, que no puede aprobar sus propios pull requests. En un equipo real convendría activarla, para que nadie, ni el administrador, pueda saltarse la revisión.
 - **Revisión de pull requests.** Cada pull request necesita al menos una aprobación de otra persona antes de fusionarse. Así se detectan errores y datos sensibles antes de que lleguen a `main`.
 - **Autenticación en dos pasos (2FA)** activada en todas las cuentas con acceso al repositorio.
 - **Mínimo privilegio** en los permisos, revisando cada cierto tiempo la lista de colaboradores y quitando el acceso a quien ya no participa.
@@ -97,3 +117,35 @@ Se aplica el **principio de mínimo privilegio**: cada persona recibe solo el ac
 | Versiones importantes | Se marcan con etiquetas (`git tag`) o *Releases* en GitHub, para volver fácilmente a una entrega concreta. |
 
 Con la rama protegida y la revisión de pull requests se evita la mayoría de los errores graves. Con varias copias del repositorio, en GitHub, en los equipos del equipo de trabajo y en una copia espejo, se puede recuperar aunque falle cualquiera de ellas.
+
+## 5. Evidencias
+
+### Prueba del `.gitignore`
+
+Se crearon en la raíz del repositorio once ficheros de prueba: diez que deben ignorarse y uno normal (`prueba_normal.md`). Después se comprobó con Git cuáles se podían subir:
+
+```bash
+git status --short
+git status --ignored --short
+git check-ignore -v .env db.properties credenciales.txt servidor.key Main.class build/app.jar nbproject/private/private.xml ".~lock.Actividad1.odt#" error.log Thumbs.db prueba_normal.md
+```
+
+- `git status` solo muestra `prueba_normal.md` como fichero nuevo para subir.
+- `git status --ignored` marca los otros diez con `!!`, es decir, ignorados.
+- `git check-ignore -v` indica qué línea del `.gitignore` excluye cada fichero. `prueba_normal.md` no aparece porque no lo excluye ninguna regla.
+
+Al terminar, los ficheros de prueba se borraron sin subirlos.
+
+![Prueba del .gitignore con git status y git check-ignore](evidencias/prueba_gitignore.png)
+
+### Cambios mediante pull request
+
+El `SECURITY.md` y la ampliación del `.gitignore` no se subieron directamente a `main`. Se hicieron en la rama `seguridad-repositorio` y entraron en `main` mediante el pull request #1, revisado y fusionado por el administrador.
+
+![Pull request #1 fusionado en main](evidencias/pull_request_1.png)
+
+### Historial de commits
+
+El historial de `main` guarda cada cambio con su autor y su fecha, y permite volver a cualquier versión anterior.
+
+![Historial de commits de main](evidencias/historial_commits.png)
